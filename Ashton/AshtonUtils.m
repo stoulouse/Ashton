@@ -6,17 +6,17 @@
 + (id)CTFontRefWithFamilyName:(NSString *)familyName postScriptName:(NSString *)postScriptName size:(CGFloat)pointSize boldTrait:(BOOL)isBold italicTrait:(BOOL)isItalic features:(NSArray *)features {
 
     NSMutableDictionary *descriptorAttributes = [NSMutableDictionary dictionaryWithCapacity:2];
-    if (familyName) descriptorAttributes[(id)kCTFontNameAttribute] = familyName;
-    if (postScriptName) descriptorAttributes[(id)kCTFontNameAttribute] = postScriptName;
-    CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes((__bridge CFDictionaryRef)(descriptorAttributes));
+    if (familyName) [descriptorAttributes setObject:familyName forKey:(id)kCTFontNameAttribute];
+    if (postScriptName) [descriptorAttributes setObject:postScriptName forKey:(id)kCTFontNameAttribute];
+    CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes((CFDictionaryRef)(descriptorAttributes));
 
     if (features) {
         NSMutableArray *fontFeatures = [NSMutableArray array];
         for (NSArray *feature in features) {
-            [fontFeatures addObject:@{(id)kCTFontFeatureTypeIdentifierKey:feature[0], (id)kCTFontFeatureSelectorIdentifierKey:feature[1]}];
+            [fontFeatures addObject:@{(id)kCTFontFeatureTypeIdentifierKey:[feature objectAtIndex:0], (id)kCTFontFeatureSelectorIdentifierKey:[feature objectAtIndex:1]}];
         }
-        descriptorAttributes[(id)kCTFontFeatureSettingsAttribute] = fontFeatures;
-        CTFontDescriptorRef newDescriptor = CTFontDescriptorCreateWithAttributes((__bridge CFDictionaryRef)(descriptorAttributes));
+        [descriptorAttributes setObject:fontFeatures forKey:(id)kCTFontFeatureSettingsAttribute];
+        CTFontDescriptorRef newDescriptor = CTFontDescriptorCreateWithAttributes((CFDictionaryRef)(descriptorAttributes));
         CFRelease(descriptor);
         descriptor = newDescriptor;
     }

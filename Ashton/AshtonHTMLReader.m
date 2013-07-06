@@ -9,6 +9,8 @@
 
 @implementation AshtonHTMLReader
 
+@synthesize parser, output, styleStack;
+
 + (instancetype)HTMLReader {
     return [[AshtonHTMLReader alloc] init];
 }
@@ -30,7 +32,7 @@
     NSMutableDictionary *attrs = [NSMutableDictionary dictionary];
 
     if (href) {
-        attrs[AshtonAttrLink] = href;
+        [attrs setObject:href forKey:AshtonAttrLink];
     }
 
     if (styleString) {
@@ -47,27 +49,30 @@
             [scanner scanCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:NULL];
             if ([key isEqualToString:@"text-align"]) {
                 // produces: paragraph.text-align
-                NSMutableDictionary *paragraphAttrs = attrs[AshtonAttrParagraph];
-                if (!paragraphAttrs) paragraphAttrs = attrs[AshtonAttrParagraph] = [NSMutableDictionary dictionary];
+                NSMutableDictionary *paragraphAttrs = [attrs objectForKey:AshtonAttrParagraph];
+                if (!paragraphAttrs) {
+					[attrs setObject:[NSMutableDictionary dictionary] forKey:AshtonAttrParagraph];
+					paragraphAttrs = [attrs objectForKey:AshtonAttrParagraph];
+				}
 
-                if ([value isEqualToString:@"left"]) paragraphAttrs[AshtonParagraphAttrTextAlignment] = AshtonParagraphAttrTextAlignmentStyleLeft;
-                if ([value isEqualToString:@"right"]) paragraphAttrs[AshtonParagraphAttrTextAlignment] = AshtonParagraphAttrTextAlignmentStyleRight;
-                if ([value isEqualToString:@"center"]) paragraphAttrs[AshtonParagraphAttrTextAlignment] = AshtonParagraphAttrTextAlignmentStyleCenter;
-                if ([value isEqualToString:@"justify"]) paragraphAttrs[AshtonParagraphAttrTextAlignment] = AshtonParagraphAttrTextAlignmentStyleJustified;
+                if ([value isEqualToString:@"left"]) [paragraphAttrs setObject:AshtonParagraphAttrTextAlignmentStyleLeft forKey:AshtonParagraphAttrTextAlignment];
+                if ([value isEqualToString:@"right"]) [paragraphAttrs setObject:AshtonParagraphAttrTextAlignmentStyleRight forKey:AshtonParagraphAttrTextAlignment];
+                if ([value isEqualToString:@"center"]) [paragraphAttrs setObject:AshtonParagraphAttrTextAlignmentStyleCenter forKey:AshtonParagraphAttrTextAlignment];
+                if ([value isEqualToString:@"justify"]) [paragraphAttrs setObject:AshtonParagraphAttrTextAlignmentStyleJustified forKey:AshtonParagraphAttrTextAlignment];
             }
             if ([key isEqualToString:@"vertical-align"]) {
                 // produces verticalAlign
                 // skip if vertical-align was already assigned by -cocoa-vertical-align
-                if (!attrs[AshtonAttrVerticalAlign]) {
-                    if ([value isEqualToString:@"sub"]) attrs[AshtonAttrVerticalAlign] = @(-1);
-                    if ([value isEqualToString:@"super"]) attrs[AshtonAttrVerticalAlign] = @(+1);
+                if (![attrs objectForKey:AshtonAttrVerticalAlign]) {
+                    if ([value isEqualToString:@"sub"]) [attrs setObject:@(-1) forKey:AshtonAttrVerticalAlign];
+                    if ([value isEqualToString:@"super"]) [attrs setObject:@(+1) forKey:AshtonAttrVerticalAlign];
                 }
             }
             if ([key isEqualToString:@"-cocoa-vertical-align"]) {
-                attrs[AshtonAttrVerticalAlign] = @([value integerValue]);
+                [attrs setObject:@([value integerValue]) forKey:AshtonAttrVerticalAlign];
             }
             if ([key isEqualToString:@"-cocoa-baseline-offset"]) {
-                attrs[AshtonAttrBaselineOffset] = @([value floatValue]);
+                [attrs setObject:@([value floatValue]) forKey:AshtonAttrBaselineOffset];
             }
             if ([key isEqualToString:AshtonAttrFont]) {
                 // produces: font
@@ -80,49 +85,49 @@
                 NSString *familyName; [scanner scanUpToString:@"\"" intoString:&familyName];
 
                 NSDictionary *fontAttrs = @{ AshtonFontAttrTraitBold: @(traitBold), AshtonFontAttrTraitItalic: @(traitItalic), AshtonFontAttrFamilyName: familyName, AshtonFontAttrPointSize: @(pointSize), AshtonFontAttrFeatures: @[] };
-                attrs[AshtonAttrFont] = [self mergeFontAttributes:fontAttrs into:attrs[AshtonAttrFont]];
+                [attrs setObject:[self mergeFontAttributes:fontAttrs into: [attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
             }
-            if ([key isEqualToString:@"-cocoa-font-postscriptname"]) {
-                NSScanner *scanner = [NSScanner scannerWithString:value];
-                [scanner scanString:@"\"" intoString:NULL];
-                NSString *postScriptName; [scanner scanUpToString:@"\"" intoString:&postScriptName];
-                NSDictionary *fontAttrs = @{ AshtonFontAttrPostScriptName:postScriptName };
-                attrs[AshtonAttrFont] = [self mergeFontAttributes:fontAttrs into:attrs[AshtonAttrFont]];
-            }
+//            if ([key isEqualToString:@"-cocoa-font-postscriptname"]) {
+//                NSScanner *scanner = [NSScanner scannerWithString:value];
+//                [scanner scanString:@"\"" intoString:NULL];
+//                NSString *postScriptName; [scanner scanUpToString:@"\"" intoString:&postScriptName];
+//                NSDictionary *fontAttrs = @{ AshtonFontAttrPostScriptName:postScriptName };
+//                [attrs setObject:[self mergeFontAttributes:fontAttrs into:[attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
+//            }
             if ([key isEqualToString:@"-cocoa-font-features"]) {
                 NSMutableArray *features = [NSMutableArray array];
                 for (NSString *feature in [value componentsSeparatedByString:@" "]) {
                     NSArray *values = [feature componentsSeparatedByString:@"/"];
-                    [features addObject:@[@([values[0] integerValue]), @([values[1] integerValue])]];
+                    [features addObject:@[@([[values objectAtIndex:0] integerValue]), @([[values objectAtIndex:1] integerValue])]];
                 }
 
                 NSDictionary *fontAttrs = @{ AshtonFontAttrFeatures: features };
-                attrs[AshtonAttrFont] = [self mergeFontAttributes:fontAttrs into:attrs[AshtonAttrFont]];
+                [attrs setObject:[self mergeFontAttributes:fontAttrs into:[attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
             }
 
             if ([key isEqualToString:@"-cocoa-underline"]) {
                 // produces: underline
-                if ([value isEqualToString:@"single"]) attrs[AshtonAttrUnderline] = AshtonUnderlineStyleSingle;
-                if ([value isEqualToString:@"thick"]) attrs[AshtonAttrUnderline] = AshtonUnderlineStyleThick;
-                if ([value isEqualToString:@"double"]) attrs[AshtonAttrUnderline] = AshtonUnderlineStyleDouble;
+                if ([value isEqualToString:@"single"]) [attrs setObject:AshtonUnderlineStyleSingle forKey:AshtonAttrUnderline];
+                if ([value isEqualToString:@"thick"]) [attrs setObject:AshtonUnderlineStyleThick forKey:AshtonAttrUnderline];
+                if ([value isEqualToString:@"double"]) [attrs setObject:AshtonUnderlineStyleDouble forKey:AshtonAttrUnderline];
             }
             if ([key isEqualToString:@"-cocoa-underline-color"]) {
                 // produces: underlineColor
-                attrs[AshtonAttrUnderlineColor] = [self colorForCSS:value];
+                [attrs setObject:[self colorForCSS:value] forKey:AshtonAttrUnderlineColor];
             }
             if ([key isEqualToString:AshtonAttrColor]) {
                 // produces: color
-                attrs[AshtonAttrColor] = [self colorForCSS:value];
+                [attrs setObject:[self colorForCSS:value] forKey:AshtonAttrColor];
             }
             if ([key isEqualToString:@"-cocoa-strikethrough"]) {
                 // produces: strikethrough
-                if ([value isEqualToString:@"single"]) attrs[AshtonAttrStrikethrough] = AshtonStrikethroughStyleSingle;
-                if ([value isEqualToString:@"thick"]) attrs[AshtonAttrStrikethrough] = AshtonStrikethroughStyleThick;
-                if ([value isEqualToString:@"double"]) attrs[AshtonAttrStrikethrough] = AshtonStrikethroughStyleDouble;
+                if ([value isEqualToString:@"single"]) [attrs setObject:AshtonStrikethroughStyleSingle forKey:AshtonAttrStrikethrough];
+                if ([value isEqualToString:@"thick"]) [attrs setObject:AshtonStrikethroughStyleThick forKey:AshtonAttrStrikethrough];
+                if ([value isEqualToString:@"double"]) [attrs setObject:AshtonStrikethroughStyleDouble forKey:AshtonAttrStrikethrough];
             }
             if ([key isEqualToString:@"-cocoa-strikethrough-color"]) {
                 // produces: strikethroughColor
-                attrs[AshtonAttrStrikethroughColor] = [self colorForCSS:value];
+                [attrs setObject:[self colorForCSS:value] forKey:AshtonAttrStrikethroughColor];
             }
         }
     }
@@ -135,9 +140,9 @@
     if (existing) {
         NSMutableDictionary *merged = [existing mutableCopy];
         NSArray *mergedFeatures;
-        if (existing[AshtonFontAttrFeatures] && new[AshtonFontAttrFeatures]) mergedFeatures = [existing[AshtonFontAttrFeatures] arrayByAddingObjectsFromArray:new[AshtonFontAttrFeatures]];
+        if ([existing objectForKey:AshtonFontAttrFeatures] && [new objectForKey:AshtonFontAttrFeatures]) mergedFeatures = [[existing objectForKey:AshtonFontAttrFeatures] arrayByAddingObjectsFromArray:[new objectForKey:AshtonFontAttrFeatures]];
         [merged addEntriesFromDictionary:new];
-        if (mergedFeatures) merged[AshtonFontAttrFeatures] = mergedFeatures;
+        if (mergedFeatures) [merged setObject:mergedFeatures forKey:AshtonFontAttrFeatures];
         return merged;
     } else {
         return new;
@@ -165,7 +170,7 @@
     if (self.output.length > 0) {
         if ([elementName isEqualToString:@"p"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
     }
-    [self.styleStack addObject:[self attributesForStyleString:attributeDict[@"style"] href:attributeDict[@"href"]]];
+    [self.styleStack addObject:[self attributesForStyleString:[attributeDict objectForKey:@"style"] href:[attributeDict objectForKey:@"href"]]];
 }
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
@@ -173,8 +178,12 @@
     [self.styleStack removeLastObject];
 }
 
-- (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError {
-    NSLog(@"error %@", parseError);
+- (void)parser:(NSXMLParser *)p parseErrorOccurred:(NSError *)parseError {
+    NSLog(@"XMLParser error %@", [parseError localizedDescription]);
+}
+
+-(void)parser:(NSXMLParser *)parser validationErrorOccurred:(NSError *)validationError {
+    NSLog(@"XMLParser error: %@", [validationError localizedDescription]);
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {

@@ -1,6 +1,8 @@
 #import "AshtonConverter.h"
 
-@interface AshtonCoreText : NSObject < AshtonConverter >
+@interface AshtonCoreText : NSObject < AshtonConverter > {
+	NSArray *_attributesToPreserve;
+}
 
 + (instancetype)sharedInstance;
 

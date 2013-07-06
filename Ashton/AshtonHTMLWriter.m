@@ -20,13 +20,13 @@
         NSMutableString *paragraphOutput = [NSMutableString string];
         NSMutableDictionary *paragraphAttrs = [NSMutableDictionary dictionary];
         id paragraphStyle = [paragraph attribute:AshtonAttrParagraph atIndex:0 effectiveRange:NULL];
-        if (paragraphStyle) paragraphAttrs[AshtonAttrParagraph] = paragraphStyle;
+        if (paragraphStyle) [paragraphAttrs setObject:paragraphStyle forKey:AshtonAttrParagraph];
 
         [paragraph enumerateAttributesInRange:paragraphRange options:0 usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
             NSString *content = [self HTMLEscapeString:[paragraph.string substringWithRange:range]];
             if (NSEqualRanges(range, paragraphRange)) {
                 [paragraphAttrs addEntriesFromDictionary:attrs];
-				id link = attrs[AshtonAttrLink];
+				id link = [attrs objectForKey:AshtonAttrLink];
 				NSString *linkStringValue = nil;
 				if ([link isKindOfClass:[NSString class]]) {
 					linkStringValue = link;
@@ -99,7 +99,7 @@
         [styleString appendString:@" style='"];
         NSArray *sortedKeys = [self sortedStyleKeyArray:[styles allKeys]];
         for (NSString *key in sortedKeys) {
-            id obj = styles[key];
+            id obj = [styles objectForKey:key];
             [styleString appendString:key];
             [styleString appendString:@": "];
             if ([obj respondsToSelector:@selector(stringValue)]) obj = [obj stringValue];
@@ -109,8 +109,8 @@
         [styleString appendString:@"'"];
     }
 
-    if(skipParagraphStyles && attrs[AshtonAttrLink]) {
-        id link = attrs[AshtonAttrLink];
+    if(skipParagraphStyles && [attrs objectForKey:AshtonAttrLink]) {
+        id link = [attrs objectForKey:AshtonAttrLink];
         NSString *linkStringValue = nil;
         if ([link isKindOfClass:[NSString class]]) {
             linkStringValue = link;
@@ -148,7 +148,7 @@
 }
 
 - (NSString *)tagNameForAttributes:(NSDictionary *)attrs {
-    if (attrs[AshtonAttrLink]) {
+    if ([attrs objectForKey:AshtonAttrLink]) {
         return @"a";
     }
     return @"span";
@@ -158,7 +158,7 @@
     NSMutableDictionary *styles = [NSMutableDictionary dictionary];
     for (id key in attrs) {
         if(skipParagraphStyles && [key isEqualToString:AshtonAttrParagraph]) continue;
-        [styles addEntriesFromDictionary:[self stylesForAttribute:attrs[key] withName:key]];
+        [styles addEntriesFromDictionary:[self stylesForAttribute:[attrs objectForKey:key] withName:key]];
     }
     return styles;
 }
@@ -168,74 +168,74 @@
 
     if ([attrName isEqualToString:AshtonAttrParagraph]) {
         NSDictionary *attrDict = attr;
-        if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:AshtonParagraphAttrTextAlignmentStyleLeft]) styles[@"text-align"] = @"left";
-        if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:AshtonParagraphAttrTextAlignmentStyleRight]) styles[@"text-align"] = @"right";
-        if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:AshtonParagraphAttrTextAlignmentStyleCenter]) styles[@"text-align"] = @"center";
-        if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:AshtonParagraphAttrTextAlignmentStyleJustified]) styles[@"text-align"] = @"justify";
+        if ([[attrDict objectForKey:AshtonParagraphAttrTextAlignment] isEqualToString:AshtonParagraphAttrTextAlignmentStyleLeft]) [styles setObject:@"left" forKey:@"text-align"];
+        if ([[attrDict objectForKey:AshtonParagraphAttrTextAlignment] isEqualToString:AshtonParagraphAttrTextAlignmentStyleRight]) [styles setObject:@"right" forKey:@"text-align"];
+        if ([[attrDict objectForKey:AshtonParagraphAttrTextAlignment] isEqualToString:AshtonParagraphAttrTextAlignmentStyleCenter]) [styles setObject:@"center" forKey:@"text-align"];
+        if ([[attrDict objectForKey:AshtonParagraphAttrTextAlignment] isEqualToString:AshtonParagraphAttrTextAlignmentStyleJustified]) [styles setObject:@"justify" forKey:@"text-align"];
     }
     if ([attrName isEqualToString:AshtonAttrFont]) {
         NSDictionary *attrDict = attr;
         // see https://developer.mozilla.org/en-US/docs/CSS/font
         NSMutableArray *fontStyle = [NSMutableArray array];
 
-        if ([attrDict[AshtonFontAttrTraitBold] isEqual:@(YES)]) [fontStyle addObject:@"bold"];
-        if ([attrDict[AshtonFontAttrTraitItalic] isEqual:@(YES)]) [fontStyle addObject:@"italic"];
+        if ([[attrDict objectForKey:AshtonFontAttrTraitBold] isEqual:@(YES)]) [fontStyle addObject:@"bold"];
+        if ([[attrDict objectForKey:AshtonFontAttrTraitItalic] isEqual:@(YES)]) [fontStyle addObject:@"italic"];
 
-        [fontStyle addObject:[NSString stringWithFormat:@"%gpx", [attrDict[AshtonFontAttrPointSize] floatValue]]];
-        [fontStyle addObject:[NSString stringWithFormat:@"\"%@\"", attrDict[AshtonFontAttrFamilyName]]];
-        styles[AshtonAttrFont] = [fontStyle componentsJoinedByString:@" "];
+        [fontStyle addObject:[NSString stringWithFormat:@"%gpx", [[attrDict objectForKey:AshtonFontAttrPointSize] floatValue]]];
+        [fontStyle addObject:[NSString stringWithFormat:@"\"%@\"", [attrDict objectForKey:AshtonFontAttrFamilyName]]];
+        [styles setObject:[fontStyle componentsJoinedByString:@" "] forKey:AshtonAttrFont];
 
-        NSMutableArray *fontFeatures = attrDict[AshtonFontAttrFeatures];
+        NSMutableArray *fontFeatures = [attrDict objectForKey:AshtonFontAttrFeatures];
         if ([fontFeatures count] > 0) {
             NSMutableArray *features = [NSMutableArray array];
             for (NSArray *feature in fontFeatures) {
-                [features addObject:[NSString stringWithFormat:@"%@/%@", feature[0], feature[1]]];
+                [features addObject:[NSString stringWithFormat:@"%@/%@", [feature objectAtIndex:0], [feature objectAtIndex:1]]];
             }
-            styles[@"-cocoa-font-features"] = [features componentsJoinedByString:@" "];
+            [styles setObject:[features componentsJoinedByString:@" "] forKey:@"-cocoa-font-features"];
         }
-        if (attrDict[AshtonFontAttrPostScriptName]) {
-            styles[@"-cocoa-font-postscriptname"] = [NSString stringWithFormat:@"\"%@\"", attrDict[AshtonFontAttrPostScriptName]];
+        if ([attrDict objectForKey:AshtonFontAttrPostScriptName]) {
+            [styles setObject:[NSString stringWithFormat:@"\"%@\"", [attrDict objectForKey:AshtonFontAttrPostScriptName]] forKey:@"-cocoa-font-postscriptname"];
         }
     }
     if ([attrName isEqualToString:AshtonAttrVerticalAlign]) {
         NSInteger integerValue = [attr integerValue];
-        if (integerValue < 0) styles[@"vertical-align"] = @"sub";
-        if (integerValue > 0) styles[@"vertical-align"] = @"super";
-        if (integerValue != 0) styles[@"-cocoa-vertical-align"] = @(integerValue);
+        if (integerValue < 0) [styles setObject:@"sub" forKey:@"vertical-align"];
+        if (integerValue > 0) [styles setObject:@"super" forKey:@"vertical-align"];
+        if (integerValue != 0) [styles setObject:@(integerValue) forKey:@"-cocoa-vertical-align"];
     }
     if ([attrName isEqualToString:AshtonAttrBaselineOffset]) {
-        styles[@"-cocoa-baseline-offset"] = @([attr floatValue]);
+        [styles setObject:@([attr floatValue]) forKey:@"-cocoa-baseline-offset"];
     }
     if ([attrName isEqualToString:AshtonAttrUnderline]) {
-        styles[@"text-decoration"] = @"underline";
+        [styles setObject:@"underline" forKey:@"text-decoration"];
 
-        if ([attr isEqualToString:AshtonUnderlineStyleSingle]) styles[@"-cocoa-underline"] = @"single";
-        if ([attr isEqualToString:AshtonUnderlineStyleThick]) styles[@"-cocoa-underline"] = @"thick";
-        if ([attr isEqualToString:AshtonUnderlineStyleDouble]) styles[@"-cocoa-underline"] = @"double";
+        if ([attr isEqualToString:AshtonUnderlineStyleSingle]) [styles setObject:@"single" forKey:@"-cocoa-underline"];
+        if ([attr isEqualToString:AshtonUnderlineStyleThick]) [styles setObject:@"thick" forKey:@"-cocoa-underline"];
+        if ([attr isEqualToString:AshtonUnderlineStyleDouble]) [styles setObject:@"double" forKey:@"-cocoa-underline"];
     }
     if ([attrName isEqualToString:AshtonAttrUnderlineColor]) {
-        styles[@"-cocoa-underline-color"] = [self CSSColor:attr];
+        [styles setObject:[self CSSColor:attr] forKey:@"-cocoa-underline-color"];
     }
     if ([attrName isEqualToString:AshtonAttrColor]) {
-        styles[AshtonAttrColor] = [self CSSColor:attr];
+        [styles setObject:[self CSSColor:attr] forKey:AshtonAttrColor];
     }
 
     if ([attrName isEqualToString:AshtonAttrStrikethrough]) {
-        styles[@"text-decoration"] = @"line-through";
+        [styles setObject:@"line-through" forKey:@"text-decoration"];
 
-        if ([attr isEqualToString:AshtonStrikethroughStyleSingle]) styles[@"-cocoa-strikethrough"] = @"single";
-        if ([attr isEqualToString:AshtonStrikethroughStyleThick]) styles[@"-cocoa-strikethrough"] = @"thick";
-        if ([attr isEqualToString:AshtonStrikethroughStyleDouble]) styles[@"-cocoa-strikethrough"] = @"double";
+        if ([attr isEqualToString:AshtonStrikethroughStyleSingle]) [styles setObject:@"single" forKey:@"-cocoa-strikethrough"];
+        if ([attr isEqualToString:AshtonStrikethroughStyleThick]) [styles setObject:@"thick" forKey:@"-cocoa-strikethrough"];
+        if ([attr isEqualToString:AshtonStrikethroughStyleDouble]) [styles setObject:@"double" forKey:@"-cocoa-strikethrough"];
     }
     if ([attrName isEqualToString:AshtonAttrStrikethroughColor]) {
-        styles[@"-cocoa-strikethrough-color"] = [self CSSColor:attr];
+        [styles setObject:[self CSSColor:attr] forKey:@"-cocoa-strikethrough-color"];
     }
     
     return styles;
 }
 
 - (NSString *)CSSColor:(NSArray *)color {
-    return [NSString stringWithFormat:@"rgba(%i, %i, %i, %f)", (int)([color[0] doubleValue] * 255), (int)([color[1] doubleValue] * 255), (int)([color[2] doubleValue] * 255), [color[3] doubleValue]];
+    return [NSString stringWithFormat:@"rgba(%i, %i, %i, %f)", (int)([[color objectAtIndex:0] doubleValue] * 255), (int)([[color objectAtIndex:1] doubleValue] * 255), (int)([[color objectAtIndex:2] doubleValue] * 255), [[color objectAtIndex:3] doubleValue]];
 }
 
 @end

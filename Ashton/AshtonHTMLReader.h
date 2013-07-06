@@ -1,4 +1,8 @@
-@interface AshtonHTMLReader : NSObject < NSXMLParserDelegate >
+@interface AshtonHTMLReader : NSObject < NSXMLParserDelegate > {
+	NSXMLParser *parser;
+	NSMutableAttributedString *output;
+	NSMutableArray *styleStack;
+}
 
 + (instancetype)HTMLReader;
 

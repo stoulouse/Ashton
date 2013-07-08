@@ -13,7 +13,11 @@
     if (features) {
         NSMutableArray *fontFeatures = [NSMutableArray array];
         for (NSArray *feature in features) {
-            [fontFeatures addObject:@{(id)kCTFontFeatureTypeIdentifierKey:[feature objectAtIndex:0], (id)kCTFontFeatureSelectorIdentifierKey:[feature objectAtIndex:1]}];
+            [fontFeatures addObject:
+			 [NSDictionary dictionaryWithObjectsAndKeys:
+			  [feature objectAtIndex:0], (id)kCTFontFeatureTypeIdentifierKey,
+			  [feature objectAtIndex:1], (id)kCTFontFeatureSelectorIdentifierKey,
+			  nil]];
         }
         [descriptorAttributes setObject:fontFeatures forKey:(id)kCTFontFeatureSettingsAttribute];
         CTFontDescriptorRef newDescriptor = CTFontDescriptorCreateWithAttributes((CFDictionaryRef)(descriptorAttributes));
@@ -40,7 +44,7 @@
             font = newFont;
         }
     }
-    return CFBridgingRelease(font);
+    return (id)font;
 }
 
 @end

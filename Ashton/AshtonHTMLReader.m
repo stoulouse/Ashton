@@ -30,11 +30,11 @@
 
 - (NSDictionary *)attributesForStyleString:(NSString *)styleString href:(NSString *)href {
     NSMutableDictionary *attrs = [NSMutableDictionary dictionary];
-
+	
     if (href) {
         [attrs setObject:href forKey:AshtonAttrLink];
     }
-
+	
     if (styleString) {
         NSScanner *scanner = [NSScanner scannerWithString:styleString];
         while (![scanner isAtEnd]) {
@@ -54,27 +54,23 @@
 					[attrs setObject:[NSMutableDictionary dictionary] forKey:AshtonAttrParagraph];
 					paragraphAttrs = [attrs objectForKey:AshtonAttrParagraph];
 				}
-
+				
                 if ([value isEqualToString:@"left"]) [paragraphAttrs setObject:AshtonParagraphAttrTextAlignmentStyleLeft forKey:AshtonParagraphAttrTextAlignment];
                 if ([value isEqualToString:@"right"]) [paragraphAttrs setObject:AshtonParagraphAttrTextAlignmentStyleRight forKey:AshtonParagraphAttrTextAlignment];
                 if ([value isEqualToString:@"center"]) [paragraphAttrs setObject:AshtonParagraphAttrTextAlignmentStyleCenter forKey:AshtonParagraphAttrTextAlignment];
                 if ([value isEqualToString:@"justify"]) [paragraphAttrs setObject:AshtonParagraphAttrTextAlignmentStyleJustified forKey:AshtonParagraphAttrTextAlignment];
-            }
-            if ([key isEqualToString:@"vertical-align"]) {
+            } else if ([key isEqualToString:@"vertical-align"]) {
                 // produces verticalAlign
                 // skip if vertical-align was already assigned by -cocoa-vertical-align
                 if (![attrs objectForKey:AshtonAttrVerticalAlign]) {
                     if ([value isEqualToString:@"sub"]) [attrs setObject:@(-1) forKey:AshtonAttrVerticalAlign];
                     if ([value isEqualToString:@"super"]) [attrs setObject:@(+1) forKey:AshtonAttrVerticalAlign];
                 }
-            }
-            if ([key isEqualToString:@"-cocoa-vertical-align"]) {
+            } else if ([key isEqualToString:@"-cocoa-vertical-align"]) {
                 [attrs setObject:@([value integerValue]) forKey:AshtonAttrVerticalAlign];
-            }
-            if ([key isEqualToString:@"-cocoa-baseline-offset"]) {
+            } else if ([key isEqualToString:@"-cocoa-baseline-offset"]) {
                 [attrs setObject:@([value floatValue]) forKey:AshtonAttrBaselineOffset];
-            }
-            if ([key isEqualToString:AshtonAttrFont]) {
+            } else if ([key isEqualToString:AshtonAttrFont]) {
                 // produces: font
                 NSScanner *scanner = [NSScanner scannerWithString:value];
                 BOOL traitBold = [scanner scanString:@"bold " intoString:NULL];
@@ -83,55 +79,57 @@
                 [scanner scanString:@"px " intoString:NULL];
                 [scanner scanString:@"\"" intoString:NULL];
                 NSString *familyName; [scanner scanUpToString:@"\"" intoString:&familyName];
-
+				
                 NSDictionary *fontAttrs = @{ AshtonFontAttrTraitBold: @(traitBold), AshtonFontAttrTraitItalic: @(traitItalic), AshtonFontAttrFamilyName: familyName, AshtonFontAttrPointSize: @(pointSize), AshtonFontAttrFeatures: @[] };
                 [attrs setObject:[self mergeFontAttributes:fontAttrs into: [attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
-            }
-//            if ([key isEqualToString:@"-cocoa-font-postscriptname"]) {
-//                NSScanner *scanner = [NSScanner scannerWithString:value];
-//                [scanner scanString:@"\"" intoString:NULL];
-//                NSString *postScriptName; [scanner scanUpToString:@"\"" intoString:&postScriptName];
-//                NSDictionary *fontAttrs = @{ AshtonFontAttrPostScriptName:postScriptName };
-//                [attrs setObject:[self mergeFontAttributes:fontAttrs into:[attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
-//            }
-            if ([key isEqualToString:@"-cocoa-font-features"]) {
-                NSMutableArray *features = [NSMutableArray array];
-                for (NSString *feature in [value componentsSeparatedByString:@" "]) {
-                    NSArray *values = [feature componentsSeparatedByString:@"/"];
-                    [features addObject:@[@([[values objectAtIndex:0] integerValue]), @([[values objectAtIndex:1] integerValue])]];
-                }
-
-                NSDictionary *fontAttrs = @{ AshtonFontAttrFeatures: features };
+			}  else if ([key isEqualToString:@"-cocoa-font-postscriptname"]) {
+                NSScanner *scanner = [NSScanner scannerWithString:value];
+                [scanner scanString:@"\"" intoString:NULL];
+                NSString *postScriptName; [scanner scanUpToString:@"\"" intoString:&postScriptName];
+                NSDictionary *fontAttrs = @{ AshtonFontAttrPostScriptName:postScriptName };
                 [attrs setObject:[self mergeFontAttributes:fontAttrs into:[attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
-            }
-
-            if ([key isEqualToString:@"-cocoa-underline"]) {
-                // produces: underline
-                if ([value isEqualToString:@"single"]) [attrs setObject:AshtonUnderlineStyleSingle forKey:AshtonAttrUnderline];
-                if ([value isEqualToString:@"thick"]) [attrs setObject:AshtonUnderlineStyleThick forKey:AshtonAttrUnderline];
-                if ([value isEqualToString:@"double"]) [attrs setObject:AshtonUnderlineStyleDouble forKey:AshtonAttrUnderline];
-            }
-            if ([key isEqualToString:@"-cocoa-underline-color"]) {
-                // produces: underlineColor
-                [attrs setObject:[self colorForCSS:value] forKey:AshtonAttrUnderlineColor];
-            }
-            if ([key isEqualToString:AshtonAttrColor]) {
-                // produces: color
-                [attrs setObject:[self colorForCSS:value] forKey:AshtonAttrColor];
-            }
-            if ([key isEqualToString:@"-cocoa-strikethrough"]) {
-                // produces: strikethrough
-                if ([value isEqualToString:@"single"]) [attrs setObject:AshtonStrikethroughStyleSingle forKey:AshtonAttrStrikethrough];
-                if ([value isEqualToString:@"thick"]) [attrs setObject:AshtonStrikethroughStyleThick forKey:AshtonAttrStrikethrough];
-                if ([value isEqualToString:@"double"]) [attrs setObject:AshtonStrikethroughStyleDouble forKey:AshtonAttrStrikethrough];
-            }
-            if ([key isEqualToString:@"-cocoa-strikethrough-color"]) {
-                // produces: strikethroughColor
-                [attrs setObject:[self colorForCSS:value] forKey:AshtonAttrStrikethroughColor];
-            }
+            } else if ([key isEqualToString:@"-cocoa-font-features"]) {
+				NSMutableArray *features = [NSMutableArray array];
+				for (NSString *feature in [value componentsSeparatedByString:@" "]) {
+					NSArray *values = [feature componentsSeparatedByString:@"/"];
+					[features addObject:@[@([[values objectAtIndex:0] integerValue]), @([[values objectAtIndex:1] integerValue])]];
+				}
+				
+				NSDictionary *fontAttrs = @{ AshtonFontAttrFeatures: features };
+				[attrs setObject:[self mergeFontAttributes:fontAttrs into:[attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
+			} else if ([key isEqualToString:@"-cocoa-underline"]) {
+				// produces: underline
+				if ([value isEqualToString:@"single"]) [attrs setObject:AshtonUnderlineStyleSingle forKey:AshtonAttrUnderline];
+				if ([value isEqualToString:@"thick"]) [attrs setObject:AshtonUnderlineStyleThick forKey:AshtonAttrUnderline];
+				if ([value isEqualToString:@"double"]) [attrs setObject:AshtonUnderlineStyleDouble forKey:AshtonAttrUnderline];
+			} else if ([key isEqualToString:@"text-decoration"]) {
+				// produces: underline
+				if ([value isEqualToString:@"none"]) {
+					[attrs removeObjectForKey:AshtonUnderlineStyleSingle];
+					[attrs removeObjectForKey:AshtonStrikethroughStyleSingle];
+				}
+				if ([value isEqualToString:@"underline"]) [attrs setObject:AshtonUnderlineStyleSingle forKey:AshtonAttrUnderline];
+				if ([value isEqualToString:@"line-through"]) [attrs setObject:AshtonStrikethroughStyleSingle forKey:AshtonAttrStrikethrough];
+			} else if ([key isEqualToString:@"-cocoa-underline-color"]) {
+				// produces: underlineColor
+				[attrs setObject:[self colorForCSS:value] forKey:AshtonAttrUnderlineColor];
+			} else if ([key isEqualToString:AshtonAttrColor]) {
+				// produces: color
+				[attrs setObject:[self colorForCSS:value] forKey:AshtonAttrColor];
+			} else if ([key isEqualToString:@"-cocoa-strikethrough"]) {
+				// produces: strikethrough
+				if ([value isEqualToString:@"single"]) [attrs setObject:AshtonStrikethroughStyleSingle forKey:AshtonAttrStrikethrough];
+				if ([value isEqualToString:@"thick"]) [attrs setObject:AshtonStrikethroughStyleThick forKey:AshtonAttrStrikethrough];
+				if ([value isEqualToString:@"double"]) [attrs setObject:AshtonStrikethroughStyleDouble forKey:AshtonAttrStrikethrough];
+			} else if ([key isEqualToString:@"-cocoa-strikethrough-color"]) {
+				// produces: strikethroughColor
+				[attrs setObject:[self colorForCSS:value] forKey:AshtonAttrStrikethroughColor];
+			} else {
+				NSLog(@"unsupported html style: %@", key);
+			}
         }
     }
-
+	
     return attrs;
 }
 
@@ -139,10 +137,14 @@
 - (NSDictionary *)mergeFontAttributes:(NSDictionary *)new into:(NSDictionary *)existing {
     if (existing) {
         NSMutableDictionary *merged = [existing mutableCopy];
-        NSArray *mergedFeatures;
-        if ([existing objectForKey:AshtonFontAttrFeatures] && [new objectForKey:AshtonFontAttrFeatures]) mergedFeatures = [[existing objectForKey:AshtonFontAttrFeatures] arrayByAddingObjectsFromArray:[new objectForKey:AshtonFontAttrFeatures]];
+        NSArray *mergedFeatures = nil;
+        if ([existing objectForKey:AshtonFontAttrFeatures] && [new objectForKey:AshtonFontAttrFeatures]) {
+			mergedFeatures = [[existing objectForKey:AshtonFontAttrFeatures] arrayByAddingObjectsFromArray:[new objectForKey:AshtonFontAttrFeatures]];
+		}
         [merged addEntriesFromDictionary:new];
-        if (mergedFeatures) [merged setObject:mergedFeatures forKey:AshtonFontAttrFeatures];
+        if (mergedFeatures) {
+			[merged setObject:mergedFeatures forKey:AshtonFontAttrFeatures];
+		}
         return merged;
     } else {
         return new;
@@ -187,21 +189,23 @@
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-    NSMutableAttributedString *fragment = [[NSMutableAttributedString alloc] initWithString:string attributes:[self currentAttributes]];
-    [self.output appendAttributedString:fragment];
+	if (![string isEqualToString:@"\n"]) {
+		NSMutableAttributedString *fragment = [[NSMutableAttributedString alloc] initWithString:string attributes:[self currentAttributes]];
+		[self.output appendAttributedString:fragment];
+	}
 }
 
 - (id)colorForCSS:(NSString *)css {
-  NSScanner *scanner = [NSScanner scannerWithString:css];
-  [scanner scanString:@"rgba(" intoString:NULL];
-  int red; [scanner scanInt:&red];
-  [scanner scanString:@", " intoString:NULL];
-  int green; [scanner scanInt:&green];
-  [scanner scanString:@", " intoString:NULL];
-  int blue; [scanner scanInt:&blue];
-  [scanner scanString:@", " intoString:NULL];
-  float alpha; [scanner scanFloat:&alpha];
- 
-  return @[ @((float)red / 255), @((float)green / 255), @((float)blue / 255), @(alpha) ];
+	NSScanner *scanner = [NSScanner scannerWithString:css];
+	[scanner scanString:@"rgba(" intoString:NULL];
+	int red; [scanner scanInt:&red];
+	[scanner scanString:@", " intoString:NULL];
+	int green; [scanner scanInt:&green];
+	[scanner scanString:@", " intoString:NULL];
+	int blue; [scanner scanInt:&blue];
+	[scanner scanString:@", " intoString:NULL];
+	float alpha; [scanner scanFloat:&alpha];
+	
+	return @[ @((float)red / 255), @((float)green / 255), @((float)blue / 255), @(alpha) ];
 }
 @end

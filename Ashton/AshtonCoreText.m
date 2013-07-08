@@ -132,7 +132,10 @@
                                                      boldTrait:[[attrDict objectForKey:AshtonFontAttrTraitBold] isEqual:@(YES)]
                                                    italicTrait:[[attrDict objectForKey:AshtonFontAttrTraitItalic] isEqual:@(YES)]
                                                       features:[attrDict objectForKey:AshtonFontAttrFeatures]];
-                if (font) [newAttrs setObject:font forKey:(id)kCTFontAttributeName];
+                if (font) {					
+					[newAttrs setObject:font forKey:(id)kCTFontAttributeName];
+					CFRelease(font);
+				}
             }
             if ([attrName isEqualToString:AshtonAttrVerticalAlign]) {
                 [newAttrs setObject:@([attr integerValue]) forKey:(id)kCTSuperscriptAttributeName];

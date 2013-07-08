@@ -138,7 +138,10 @@
                                                           boldTrait:[[attrDict objectForKey:AshtonFontAttrTraitBold] isEqual:@(YES)]
                                                         italicTrait:[[attrDict objectForKey:AshtonFontAttrTraitItalic] isEqual:@(YES)]
                                                            features:[attrDict objectForKey:AshtonFontAttrFeatures]];
-                if (font) [newAttrs setObject:font forKey:NSFontAttributeName];
+                if (font) {
+					[newAttrs setObject:font forKey:NSFontAttributeName];
+					CFRelease(font);
+				}
             }
             if ([attrName isEqualToString:AshtonAttrVerticalAlign]) {
                 [newAttrs setObject:attr forKey:NSSuperscriptAttributeName];

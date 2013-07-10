@@ -77,15 +77,28 @@
                 BOOL traitItalic = [scanner scanString:@"italic " intoString:NULL];
                 NSInteger pointSize; [scanner scanInteger:&pointSize];
                 [scanner scanString:@"px " intoString:NULL];
-                [scanner scanString:@"\"" intoString:NULL];
-                NSString *familyName; [scanner scanUpToString:@"\"" intoString:&familyName];
+				NSString *familyName = nil;
+                if ([scanner scanString:@"\\\"" intoString:NULL])
+					[scanner scanUpToString:@"\\\"" intoString:&familyName];
+                if ([scanner scanString:@"\"" intoString:NULL])
+					[scanner scanUpToString:@"\"" intoString:&familyName];
 				
-                NSDictionary *fontAttrs = @{ AshtonFontAttrTraitBold: @(traitBold), AshtonFontAttrTraitItalic: @(traitItalic), AshtonFontAttrFamilyName: familyName, AshtonFontAttrPointSize: @(pointSize), AshtonFontAttrFeatures: @[] };
+//                NSDictionary *fontAttrs = @{ AshtonFontAttrTraitBold: @(traitBold), AshtonFontAttrTraitItalic: @(traitItalic), AshtonFontAttrFamilyName: familyName, AshtonFontAttrPointSize: @(pointSize), AshtonFontAttrFeatures: @[] };
+				NSDictionary *fontAttrs = [NSDictionary dictionaryWithObjectsAndKeys:
+										   [NSNumber numberWithBool:traitBold], AshtonFontAttrTraitBold,
+										   [NSNumber numberWithBool:traitItalic], AshtonFontAttrTraitItalic,
+										   familyName, AshtonFontAttrFamilyName,
+										   [NSNumber numberWithInt:pointSize], AshtonFontAttrPointSize,
+										   [NSArray array], AshtonFontAttrFeatures,
+				 nil];
                 [attrs setObject:[self mergeFontAttributes:fontAttrs into: [attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
 			}  else if ([key isEqualToString:@"-cocoa-font-postscriptname"]) {
                 NSScanner *scanner = [NSScanner scannerWithString:value];
-                [scanner scanString:@"\"" intoString:NULL];
-                NSString *postScriptName; [scanner scanUpToString:@"\"" intoString:&postScriptName];
+                NSString *postScriptName;
+				if ([scanner scanString:@"\"" intoString:NULL])
+					[scanner scanUpToString:@"\"" intoString:&postScriptName];
+				if ([scanner scanString:@"\\\"" intoString:NULL])
+					[scanner scanUpToString:@"\\\"" intoString:&postScriptName];
                 NSDictionary *fontAttrs = @{ AshtonFontAttrPostScriptName:postScriptName };
                 [attrs setObject:[self mergeFontAttributes:fontAttrs into:[attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
             } else if ([key isEqualToString:@"-cocoa-font-features"]) {

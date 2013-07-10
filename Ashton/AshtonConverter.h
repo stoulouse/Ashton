@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 @protocol AshtonConverter
 
 - (NSAttributedString *)intermediateRepresentationWithTargetRepresentation:(NSAttributedString *)input;

@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 @interface NSAttributedString (Ashton)
 
 // See http://objcolumnist.com/2011/11/03/keeping-the-static-analyzer-happy-prefixed-initializers/ for an explanation of

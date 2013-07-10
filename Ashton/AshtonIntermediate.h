@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 extern NSString * const AshtonAttrColor;
 extern NSString * const AshtonAttrFont;
 extern NSString * const AshtonAttrLink;

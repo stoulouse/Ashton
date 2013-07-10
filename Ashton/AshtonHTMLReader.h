@@ -1,3 +1,5 @@
+#import <Foundation/Foundation.h>
+
 @interface AshtonHTMLReader : NSObject < NSXMLParserDelegate > {
 	NSXMLParser *parser;
 	NSMutableAttributedString *output;

@@ -4,6 +4,9 @@
 	NSXMLParser *parser;
 	NSMutableAttributedString *output;
 	NSMutableArray *styleStack;
+	NSMutableDictionary *globalStyles;
+	NSMutableString* content;
+	NSString* currentElement;
 }
 
 + (instancetype)HTMLReader;

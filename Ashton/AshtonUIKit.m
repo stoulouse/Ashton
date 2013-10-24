@@ -50,12 +50,13 @@
                 UIFont *font = attr;
                 NSMutableDictionary *attrDict = [NSMutableDictionary dictionary];
 				
-                CTFontRef ctFont = CTFontCreateWithName(( CFStringRef)font.fontName, font.pointSize, NULL);
+				CGFloat scale = [UIApplication sharedApplication].keyWindow.screen.scale;
+                CTFontRef ctFont = CTFontCreateWithName(( CFStringRef)font.fontName, font.pointSize * scale, NULL);
                 CTFontSymbolicTraits symbolicTraits = CTFontGetSymbolicTraits(ctFont);
                 if ((symbolicTraits & kCTFontTraitBold) == kCTFontTraitBold) [attrDict setObject:[NSNumber numberWithBool:YES] forKey:AshtonFontAttrTraitBold];
                 if ((symbolicTraits & kCTFontTraitItalic) == kCTFontTraitItalic) [attrDict setObject:[NSNumber numberWithBool:YES] forKey:AshtonFontAttrTraitItalic];
 				
-                [attrDict setObject:[NSNumber numberWithFloat:font.pointSize] forKey:AshtonFontAttrPointSize];
+                [attrDict setObject:[NSNumber numberWithFloat:font.pointSize * scale] forKey:AshtonFontAttrPointSize];
                 [attrDict setObject:(NSString*)CTFontCopyName(ctFont, kCTFontFamilyNameKey) forKey:AshtonFontAttrFamilyName];
                 [attrDict setObject:(NSString*)CTFontCopyName(ctFont, kCTFontPostScriptNameKey) forKey:AshtonFontAttrPostScriptName];
                 CFRelease(ctFont);

@@ -69,7 +69,14 @@
                 }
 				
                 [attrDict setObject:features forKey:AshtonFontAttrFeatures];
-                [attrDict setObject:@(CTFontGetSize(font)) forKey:AshtonFontAttrPointSize];
+
+#if TARGET_OS_IPHONE
+				CGFloat scale = [UIApplication sharedApplication].keyWindow.screen.scale;
+#else
+				CGFloat scale = 1.0f;
+#endif
+
+                [attrDict setObject:@(CTFontGetSize(font) * scale) forKey:AshtonFontAttrPointSize];
                 [attrDict setObject:CFBridgingRelease(CTFontCopyName(font, kCTFontFamilyNameKey)) forKey:AshtonFontAttrFamilyName];
                 [attrDict setObject:CFBridgingRelease(CTFontCopyName(font, kCTFontPostScriptNameKey)) forKey:AshtonFontAttrPostScriptName];
                 [newAttrs setObject:attrDict forKey:AshtonAttrFont];

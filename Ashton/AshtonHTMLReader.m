@@ -23,7 +23,12 @@
     self.styleStack = [NSMutableArray array];
     self.content = [NSMutableString string];
 	self.globalStyles = [NSMutableDictionary dictionary];
-    NSMutableString *stringToParse = [NSMutableString stringWithCapacity:(htmlString.length + 13)];
+
+	NSDictionary * style = [self attributesForStyleString:@"font-size: 12px;" href:nil element:@"style"];
+	[self.globalStyles setObject:style forKey:@"*"];
+    
+	
+	NSMutableString *stringToParse = [NSMutableString stringWithCapacity:(htmlString.length + 13)];
     [stringToParse appendString:@"<html>"];
     [stringToParse appendString:htmlString];
     [stringToParse appendString:@"</html>"];
@@ -103,16 +108,15 @@
 					[scanner scanUpToString:@"\"" intoString:&familyName];
 				
 #if TARGET_OS_IPHONE
-				CGFloat scale = [UIApplication sharedApplication].keyWindow.screen.scale;
-#else
-				CGFloat scale = 1.0f;
+				pointSize *= [[UIScreen mainScreen] scale] * [[UIScreen mainScreen] scale];
 #endif
+				
 //                NSDictionary *fontAttrs = @{ AshtonFontAttrTraitBold: @(traitBold), AshtonFontAttrTraitItalic: @(traitItalic), AshtonFontAttrFamilyName: familyName, AshtonFontAttrPointSize: @(pointSize), AshtonFontAttrFeatures: @[] };
 				NSDictionary *fontAttrs = [NSDictionary dictionaryWithObjectsAndKeys:
 										   [NSNumber numberWithBool:traitBold], AshtonFontAttrTraitBold,
 										   [NSNumber numberWithBool:traitItalic], AshtonFontAttrTraitItalic,
 										   familyName, AshtonFontAttrFamilyName,
-										   [NSNumber numberWithInt:pointSize * scale], AshtonFontAttrPointSize,
+										   [NSNumber numberWithInt:pointSize], AshtonFontAttrPointSize,
 										   [NSArray array], AshtonFontAttrFeatures,
 				 nil];
                 [attrs setObject:[self mergeFontAttributes:fontAttrs into: [attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];
@@ -145,12 +149,11 @@
                 [scanner scanString:@"px" intoString:NULL];
 
 #if TARGET_OS_IPHONE
-				CGFloat scale = [UIApplication sharedApplication].keyWindow.screen.scale;
-#else
-				CGFloat scale = 1.0f;
+				pointSize *= [[UIScreen mainScreen] scale] * [[UIScreen mainScreen] scale];
 #endif
+				
 				NSDictionary *fontAttrs = [NSDictionary dictionaryWithObjectsAndKeys:
-										   [NSNumber numberWithInt:pointSize * scale], AshtonFontAttrPointSize,
+										   [NSNumber numberWithInt:pointSize], AshtonFontAttrPointSize,
 										   [NSArray array], AshtonFontAttrFeatures,
 										   nil];
                 [attrs setObject:[self mergeFontAttributes:fontAttrs into: [attrs objectForKey:AshtonAttrFont]] forKey:AshtonAttrFont];

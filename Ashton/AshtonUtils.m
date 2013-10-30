@@ -24,7 +24,7 @@
         CFRelease(descriptor);
         descriptor = newDescriptor;
     }
-
+	
     CTFontRef font = CTFontCreateWithFontDescriptor(descriptor, pointSize, NULL);
     CFRelease(descriptor);
 
@@ -36,7 +36,7 @@
     if (symbolicTraits != 0) {
         // Unfortunately CTFontCreateCopyWithSymbolicTraits returns NULL when there are no symbolicTraits (== 0)
         // Is there a better way to detect "no" symbolic traits?
-        CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits(font, 0.0, NULL, symbolicTraits, symbolicTraits);
+        CTFontRef newFont = CTFontCreateCopyWithSymbolicTraits(font, pointSize, NULL, symbolicTraits, symbolicTraits);
         // And even worse, if a font is defined to be "only" bold (like Arial Rounded MT Bold is) then
         // CTFontCreateCopyWithSymbolicTraits also returns NULL
         if (newFont != NULL) {

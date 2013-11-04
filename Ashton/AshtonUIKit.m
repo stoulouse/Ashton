@@ -111,28 +111,32 @@
 				
                 [newAttrs setObject:paragraphStyle forKey:NSParagraphStyleAttributeName];
             } else if ([attrName isEqualToString:AshtonAttrFont]) {
-                // consumes: font
-                NSDictionary *attrDict = attr;
-				
-				CGFloat pointSize = [[attrDict objectForKey:AshtonFontAttrPointSize] doubleValue];
-                CTFontRef ctFont = ( CTFontRef)([AshtonUtils CTFontRefWithFamilyName:[attrDict objectForKey:AshtonFontAttrFamilyName]
-																	  postScriptName:[attrDict objectForKey:AshtonFontAttrPostScriptName]
-																				size:pointSize
-																		   boldTrait:[[attrDict objectForKey:AshtonFontAttrTraitBold] isEqual:[NSNumber numberWithBool:YES]]
-																		 italicTrait:[[attrDict objectForKey:AshtonFontAttrTraitItalic] isEqual:[NSNumber numberWithBool:YES]]
-																			features:[attrDict objectForKey:AshtonFontAttrFeatures]]);
-				
-                if (ctFont) {
-                    // We need to construct a kCTFontPostScriptNameKey for the font with the given attributes
-                    NSString *fontName = (NSString*)CTFontCopyName(ctFont, kCTFontPostScriptNameKey);
-                    UIFont *font = [UIFont fontWithName:fontName size:pointSize];
+				if ([[UIDevice currentDevice].systemVersion floatValue] >= 6.0f) {
+					// consumes: font
+					NSDictionary *attrDict = attr;
 					
-                    if (font) [newAttrs setObject:font forKey:NSFontAttributeName];
-					CFRelease(ctFont);
-                } else {
-                    // assign system font with requested size
-                    [newAttrs setObject:[UIFont systemFontOfSize:pointSize] forKey:NSFontAttributeName];
-                }
+					CGFloat pointSize = [[attrDict objectForKey:AshtonFontAttrPointSize] doubleValue];
+					CTFontRef ctFont = ( CTFontRef)([AshtonUtils CTFontRefWithFamilyName:[attrDict objectForKey:AshtonFontAttrFamilyName]
+																		  postScriptName:[attrDict objectForKey:AshtonFontAttrPostScriptName]
+																					size:pointSize
+																			   boldTrait:[[attrDict objectForKey:AshtonFontAttrTraitBold] isEqual:[NSNumber numberWithBool:YES]]
+																			 italicTrait:[[attrDict objectForKey:AshtonFontAttrTraitItalic] isEqual:[NSNumber numberWithBool:YES]]
+																				features:[attrDict objectForKey:AshtonFontAttrFeatures]]);
+					
+					if (ctFont) {
+						// We need to construct a kCTFontPostScriptNameKey for the font with the given attributes
+						NSString *fontName = (NSString*)CTFontCopyName(ctFont, kCTFontPostScriptNameKey);
+						UIFont *font = [UIFont fontWithName:fontName size:pointSize];
+						
+						if (font) {
+							[newAttrs setObject:font forKey:NSFontAttributeName];
+						}
+						CFRelease(ctFont);
+					} else {
+						// assign system font with requested size
+						[newAttrs setObject:[UIFont systemFontOfSize:pointSize] forKey:NSFontAttributeName];
+					}
+				}
             } else if ([attrName isEqualToString:AshtonAttrUnderline]) {
                 // consumes: underline
                 if ([attr isEqualToString:AshtonUnderlineStyleSingle]) [newAttrs setObject:[NSNumber numberWithInt:NSUnderlineStyleSingle] forKey:NSUnderlineStyleAttributeName];

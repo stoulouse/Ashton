@@ -100,16 +100,18 @@
         for (NSString *attrName in attrs) {
             id attr = [attrs objectForKey:attrName];
             if ([attrName isEqualToString:AshtonAttrParagraph]) {
-                // consumes: paragraph
-                NSDictionary *attrDict = attr;
-                NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-				
-                if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:@"left"])  paragraphStyle.alignment = NSTextAlignmentLeft;
-                if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:@"right"]) paragraphStyle.alignment = NSTextAlignmentRight;
-                if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:@"center"]) paragraphStyle.alignment = NSTextAlignmentCenter;
-                if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:@"justified"]) paragraphStyle.alignment = NSTextAlignmentJustified;
-				
-                [newAttrs setObject:paragraphStyle forKey:NSParagraphStyleAttributeName];
+				if ([[UIDevice currentDevice].systemVersion floatValue] >= 6.0f) {
+					// consumes: paragraph
+					NSDictionary *attrDict = attr;
+					NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+					
+					if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:@"left"])  paragraphStyle.alignment = NSTextAlignmentLeft;
+					if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:@"right"]) paragraphStyle.alignment = NSTextAlignmentRight;
+					if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:@"center"]) paragraphStyle.alignment = NSTextAlignmentCenter;
+					if ([attrDict[AshtonParagraphAttrTextAlignment] isEqualToString:@"justified"]) paragraphStyle.alignment = NSTextAlignmentJustified;
+					
+					[newAttrs setObject:paragraphStyle forKey:NSParagraphStyleAttributeName];
+				}
             } else if ([attrName isEqualToString:AshtonAttrFont]) {
 				if ([[UIDevice currentDevice].systemVersion floatValue] >= 6.0f) {
 					// consumes: font
@@ -148,7 +150,8 @@
                 if ([attr isEqualToString:AshtonStrikethroughStyleThick]) [newAttrs setObject:[NSNumber numberWithInt:NSUnderlineStyleSingle] forKey:NSStrikethroughStyleAttributeName];
             } else if ([attrName isEqualToString:AshtonAttrColor]) {
                 // consumes: color
-                [newAttrs setObject:[self colorForArray:attr] forKey:NSForegroundColorAttributeName];
+				if ([[UIDevice currentDevice].systemVersion floatValue] >= 6.0f)
+					[newAttrs setObject:[self colorForArray:attr] forKey:NSForegroundColorAttributeName];
             }
 			if ([self.attributesToPreserve isKindOfClass:[NSArray class]]) {
 				if ([self.attributesToPreserve containsObject:attrName]) {

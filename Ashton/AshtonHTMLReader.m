@@ -32,7 +32,7 @@
     [stringToParse appendString:@"<html>"];
     [stringToParse appendString:htmlString];
     [stringToParse appendString:@"</html>"];
-//	NSLog(@"parsing %@", stringToParse);
+	NSLog(@"parsing %@", stringToParse);
     self.parser = [[NSXMLParser alloc] initWithData:[stringToParse dataUsingEncoding:NSUTF8StringEncoding]];
     self.parser.delegate = self;
     [self.parser parse];
@@ -266,7 +266,7 @@
     if ([elementName isEqualToString:@"html"]) return;
     if ([elementName isEqualToString:@"style"]) return;
 
-    if (self.output.length > 0 && ![elementName isEqualToString:@"style"]) {
+//    if (self.output.length > 0 && ![elementName isEqualToString:@"style"]) {
 //        if ([elementName isEqualToString:@"p"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
 //        else if ([elementName isEqualToString:@"h1"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
 //        else if ([elementName isEqualToString:@"h2"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
@@ -277,7 +277,7 @@
 //        else if ([elementName isEqualToString:@"li"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
 //        else if ([elementName isEqualToString:@"dd"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
 //        else if ([elementName isEqualToString:@"br"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-    }
+//    }
 
 	if ([elementName isEqualToString:@"b"]) {
 		[self.styleStack addObject: [self attributesForStyleString:@"font-weight: bold" href:[attributeDict objectForKey:@"href"] element:elementName]];
@@ -316,15 +316,16 @@
 
     if (self.output.length > 0 && ![elementName isEqualToString:@"style"]) {
         if ([elementName isEqualToString:@"p"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"h1"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"h2"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"h3"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"h4"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"h5"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"h6"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"li"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"dd"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
-        else if ([elementName isEqualToString:@"br"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+//        else if ([elementName isEqualToString:@"h1"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+//        else if ([elementName isEqualToString:@"h2"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+//        else if ([elementName isEqualToString:@"h3"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+//        else if ([elementName isEqualToString:@"h4"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+//        else if ([elementName isEqualToString:@"h5"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+//        else if ([elementName isEqualToString:@"h6"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+//        else if ([elementName isEqualToString:@"li"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+//        else if ([elementName isEqualToString:@"dd"]) [self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
+        else if ([elementName isEqualToString:@"br"])
+			[self.output appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n"]];
     }
 	
     [self.styleStack removeLastObject];

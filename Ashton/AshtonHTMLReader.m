@@ -32,7 +32,7 @@
     [stringToParse appendString:@"<html>"];
     [stringToParse appendString:htmlString];
     [stringToParse appendString:@"</html>"];
-	NSLog(@"parsing %@", stringToParse);
+//	NSLog(@"parsing %@", stringToParse);
     self.parser = [[NSXMLParser alloc] initWithData:[stringToParse dataUsingEncoding:NSUTF8StringEncoding]];
     self.parser.delegate = self;
     [self.parser parse];
